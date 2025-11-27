@@ -9,32 +9,26 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  static const _primaryColor = Color(0xFFFF7A2F); // orange
+  static const _darkText = Color(0xFF121528);     // dark navy
+
   @override
   Widget build(BuildContext context) {
-    const primaryBlue = Color(0xFF0F6ACF);
+    final baseTextTheme = GoogleFonts.poppinsTextTheme();
 
     return MaterialApp(
-      title: 'Data Insight Hub',
+      title: 'Portfolio',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: primaryBlue,
+          seedColor: _primaryColor,
           brightness: Brightness.light,
         ),
-        scaffoldBackgroundColor: const Color(0xFFE9EDF5),
-        textTheme: GoogleFonts.poppinsTextTheme(),
-        cardTheme: CardThemeData(
-          color: Colors.white,
-          elevation: 0,
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: BorderSide(
-              color: Colors.grey.shade300,
-              width: 0.8,
-            ),
-          ),
+        scaffoldBackgroundColor: const Color(0xFFFFF7F1),
+        textTheme: baseTextTheme.apply(
+          bodyColor: _darkText,
+          displayColor: _darkText,
         ),
       ),
       home: const LandingPage(),
