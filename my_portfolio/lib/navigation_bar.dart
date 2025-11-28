@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart'; // Needed for Clipboard
 import 'package:url_launcher/url_launcher.dart';
 
 class AppNavBar extends StatelessWidget {
@@ -7,7 +7,7 @@ class AppNavBar extends StatelessWidget {
 
   const AppNavBar({super.key, required this.onNavClick});
 
-  // UPDATED: Smart Email Launcher
+  // Helper to launch email
   Future<void> _launchEmail(BuildContext context) async {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
@@ -16,12 +16,11 @@ class AppNavBar extends StatelessWidget {
     );
 
     try {
-      // Try to launch the email app
       if (!await launchUrl(emailLaunchUri, mode: LaunchMode.externalApplication)) {
         throw 'Could not launch';
       }
     } catch (e) {
-      // FALLBACK: Copy to clipboard if no email client is found
+      // FALLBACK: Copy to clipboard
       await Clipboard.setData(const ClipboardData(text: 'rjestuesta@gmail.com'));
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -44,14 +43,19 @@ class AppNavBar extends StatelessWidget {
       color: Colors.transparent, 
       child: Row(
         children: [
-          Text(
-            'Rainzle.',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: const Color(0xFF121528),
+          // --- LOGO REPLACEMENT START ---
+          InkWell(
+            onTap: () => onNavClick(0), // Clicking logo scrolls to top
+            child: Image.asset(
+              'assets/logo.jpg', // Make sure you named your file 'logo.jpg'
+              height:isMobile ? 60 : 100,
+              fit: BoxFit.contain,
             ),
           ),
+          // --- LOGO REPLACEMENT END ---
+
           const Spacer(),
+          
           if (!isMobile) ...[
             _NavItem(label: 'Home', onTap: () => onNavClick(0)),
             _NavItem(label: 'Certifications', onTap: () => onNavClick(1)),
@@ -69,7 +73,6 @@ class AppNavBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
-              // PASS CONTEXT HERE
               onPressed: () => _launchEmail(context), 
               child: const Text(
                 "Contact Me",
