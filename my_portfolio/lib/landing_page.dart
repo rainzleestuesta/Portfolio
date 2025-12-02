@@ -6,7 +6,6 @@ import 'projects.dart';
 
 const _primaryOrange = Color(0xFFFF7A2F);
 const _darkBlue = Color(0xFF121528);
-const _softPink = Color(0xFFFFEFE4);
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -62,49 +61,6 @@ class _LandingPageState extends State<LandingPage> {
   final GlobalKey _projectsKey = GlobalKey();
   final GlobalKey _contactKey = GlobalKey();
 
-  // 2. CV Popup Logic
-  void _showCVDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        child: Stack(
-          alignment: Alignment.topRight,
-          children: [
-            Container(
-              width: double.infinity,
-              constraints: const BoxConstraints(maxWidth: 850),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: InteractiveViewer(
-                  maxScale: 4.0, minScale: 1.0,
-                  child: Image.asset(
-                    'assets/CV_Estuesta.png', 
-                    fit: BoxFit.contain,
-                    errorBuilder: (ctx, _, __) => const Padding(
-                      padding: EdgeInsets.all(40.0),
-                      child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.broken_image, size: 50, color: Colors.grey), SizedBox(height: 16), Text("CV Image not found. Check assets/CV_Estuesta.png")]),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: FloatingActionButton.small(
-                backgroundColor: Colors.black87,
-                child: const Icon(Icons.close, color: Colors.white),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // 3. Scroll Logic
   void _scrollToSection(int index) {
     final keys = [_homeKey, _certificationsKey, _skillsKey, _projectsKey, _contactKey];
@@ -138,7 +94,7 @@ class _LandingPageState extends State<LandingPage> {
                       AppNavBar(onNavClick: _scrollToSection),
                       
                       // HERO SECTION (Pass _showCVDialog)
-                      Container(key: _homeKey, child: _HeroSection(onViewCV: () => _showCVDialog(context))),
+                      Container(key: _homeKey, child: const _HeroSection()),
                       
                       const SizedBox(height: 60),
                       const _ClientLogosRow(),
@@ -194,8 +150,7 @@ class _LandingPageState extends State<LandingPage> {
 // HERO SECTION
 //
 class _HeroSection extends StatelessWidget {
-  final VoidCallback onViewCV;
-  const _HeroSection({required this.onViewCV});
+  const _HeroSection(); // No parameters needed now
 
   @override
   Widget build(BuildContext context) {
@@ -245,12 +200,13 @@ class _HeroSection extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsets.only(top: isMobile ? 40 : 50, left: 20, right: 20),
                   child: isMobile 
-                    ? Column(children: [_HeroTextContent(onViewCV: onViewCV), const SizedBox(height: 40), const _HeroImageContent()])
+                    // removed arguments here
+                    ? Column(children: const [_HeroTextContent(), SizedBox(height: 40), _HeroImageContent()])
                     : Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                           Expanded(flex: 5, child: _HeroTextContent(onViewCV: onViewCV)),
-                           const Expanded(flex: 6, child: _HeroImageContent()),
+                        children: const [
+                           Expanded(flex: 5, child: _HeroTextContent()), // removed arguments here
+                           Expanded(flex: 6, child: _HeroImageContent()),
                         ],
                       ),
                 ),
@@ -278,8 +234,7 @@ class _HeroSection extends StatelessWidget {
 }
 
 class _HeroTextContent extends StatelessWidget {
-  final VoidCallback onViewCV;
-  const _HeroTextContent({required this.onViewCV});
+  const _HeroTextContent();
 
   @override
   Widget build(BuildContext context) {
@@ -302,7 +257,6 @@ class _HeroTextContent extends StatelessWidget {
           Row(
             children: [
               ElevatedButton(
-                // [FIXED] Pass context to launch email
                 onPressed: () => _launchEmail(context), 
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE85D04),
@@ -315,9 +269,9 @@ class _HeroTextContent extends StatelessWidget {
               ),
               const SizedBox(width: 24),
                TextButton.icon(
-                 // [FIXED] Calls the CV Popup
-                 onPressed: onViewCV,
-                 icon: const Icon(Icons.visibility, color: Color(0xFFE85D04)),
+                 // CHANGED: Opens the PDF file directly
+                 onPressed: () => _launchURL('assets/CV_Estuesta.pdf'), 
+                 icon: const Icon(Icons.description, color: Color(0xFFE85D04)), // Changed icon to document/description
                  label: const Text("View CV", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600))
                )
             ],
@@ -327,10 +281,6 @@ class _HeroTextContent extends StatelessWidget {
     );
   }
 }
-
-// ... [The rest of your existing classes: _HeroImageContent, _FloatingBadge, _ClientLogosRow, etc. stay exactly the same] ...
-// Just make sure to define the rest of the classes below as they were in your previous file.
-// I will include the CTA section update here as well since it also uses email.
 
 class _HeroImageContent extends StatelessWidget {
   const _HeroImageContent();
