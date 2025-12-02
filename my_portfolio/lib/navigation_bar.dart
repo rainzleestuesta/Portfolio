@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Needed for Clipboard
 import 'package:url_launcher/url_launcher.dart';
+import 'contact_me.dart';
 
 class AppNavBar extends StatelessWidget {
   final Function(int index) onNavClick;
@@ -48,7 +49,7 @@ class AppNavBar extends StatelessWidget {
             onTap: () => onNavClick(0), // Clicking logo scrolls to top
             child: Image.asset(
               'assets/logo.jpg', // Make sure you named your file 'logo.jpg'
-              height:isMobile ? 60 : 100,
+              height:isMobile ? 60 : 120,
               fit: BoxFit.contain,
             ),
           ),
@@ -73,7 +74,7 @@ class AppNavBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
-              onPressed: () => _launchEmail(context), 
+              onPressed: () => showContactDialog(context), 
               child: const Text(
                 "Contact Me",
                 style: TextStyle(fontWeight: FontWeight.bold),

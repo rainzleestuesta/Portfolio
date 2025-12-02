@@ -3,6 +3,7 @@ import 'package:flutter/services.dart'; // Needed for Clipboard
 import 'package:url_launcher/url_launcher.dart';
 import 'navigation_bar.dart'; 
 import 'projects.dart'; 
+import 'contact_me.dart';
 
 const _primaryOrange = Color(0xFFFF7A2F);
 const _darkBlue = Color(0xFF121528);
@@ -257,7 +258,7 @@ class _HeroTextContent extends StatelessWidget {
           Row(
             children: [
               ElevatedButton(
-                onPressed: () => _launchEmail(context), 
+                onPressed: () => showContactDialog(context), 
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE85D04),
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
@@ -978,7 +979,7 @@ class _CtaSection extends StatelessWidget {
       FilledButton(
         style: FilledButton.styleFrom(backgroundColor: const Color(0xFFFF7A2F), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
         // [FIXED] Pass context
-        onPressed: () => _launchEmail(context), 
+        onPressed: () => showContactDialog(context), 
         child: const Text('Shoot Message'),
       ),
     ]);
