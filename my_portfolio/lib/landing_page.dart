@@ -237,13 +237,56 @@ class _HeroSection extends StatelessWidget {
 class _HeroTextContent extends StatelessWidget {
   const _HeroTextContent();
 
-  @override
+@override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 60.0), 
+      padding: const EdgeInsets.only(top: 40.0), // Reduced top padding slightly to fit badge
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // --- NEW: STATUS INDICATOR ---
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE0F2F1), // Very light teal/green background
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFF009688).withOpacity(0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Green "Live" Dot
+                Container(
+                  width: 8, height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF009688), // Teal/Green
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x66009688),
+                        blurRadius: 6,
+                        spreadRadius: 2,
+                      )
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  "Open for Internship",
+                  style: TextStyle(
+                    color: Color(0xFF00695C), // Darker Teal Text
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // --- END NEW INDICATOR ---
+
+          const SizedBox(height: 24),
+          
           Text('Hey! I Am', style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800, color: _darkBlue)),
           Text('Rainzle John\nEstuesta', style: Theme.of(context).textTheme.displayLarge?.copyWith(
@@ -258,7 +301,7 @@ class _HeroTextContent extends StatelessWidget {
           Row(
             children: [
               ElevatedButton(
-                onPressed: () => showContactDialog(context), 
+                onPressed: () => _launchEmail(context), 
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE85D04),
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
@@ -270,9 +313,8 @@ class _HeroTextContent extends StatelessWidget {
               ),
               const SizedBox(width: 24),
                TextButton.icon(
-                 // CHANGED: Opens the PDF file directly
-                 onPressed: () => _launchURL('assets/CV_Estuesta.pdf'), 
-                 icon: const Icon(Icons.description, color: Color(0xFFE85D04)), // Changed icon to document/description
+                 onPressed: () => _launchURL('assets/CV_Estuesta.pdf'),
+                 icon: const Icon(Icons.description, color: Color(0xFFE85D04)),
                  label: const Text("View CV", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600))
                )
             ],
