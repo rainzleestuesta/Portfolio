@@ -301,7 +301,7 @@ class _HeroTextContent extends StatelessWidget {
           Row(
             children: [
               ElevatedButton(
-                onPressed: () => _launchEmail(context), 
+                onPressed: () => showContactDialog(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE85D04),
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
