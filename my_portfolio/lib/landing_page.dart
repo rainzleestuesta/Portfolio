@@ -313,7 +313,7 @@ class _HeroTextContent extends StatelessWidget {
               ),
               const SizedBox(width: 24),
                TextButton.icon(
-                 onPressed: () => _launchURL('assets/CV_Estuesta.pdf'),
+                 onPressed: () => _launchURL('assets/CV_Estuesta_v2.pdf'),
                  icon: const Icon(Icons.description, color: Color(0xFFE85D04)),
                  label: const Text("View CV", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600))
                )
