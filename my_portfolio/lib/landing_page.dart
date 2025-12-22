@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'navigation_bar.dart'; 
 import 'projects.dart'; 
 import 'contact_me.dart';
+import 'recommendations.dart';
 
 const _primaryOrange = Color(0xFFFF7A2F);
 const _darkBlue = Color(0xFF121528);
@@ -125,7 +126,11 @@ class _LandingPageState extends State<LandingPage> {
                       const SizedBox(height: 60),
                       // PROJECTS
                       Container(key: _projectsKey, child: const _RecentProjectsSection()),
-                      
+
+                      const SizedBox(height: 60),
+                      // RECOMMENDATIONS
+                      const _RecommendationsSection(),
+                                           
                       const SizedBox(height: 60),
                       // CTA / CONTACT
                       Container(key: _contactKey, child: const _CtaSection()),
@@ -218,12 +223,17 @@ class _HeroSection extends StatelessWidget {
           // BOTTOM FADE
           Positioned(
             bottom: 0, left: 0, right: 0, height: 100,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [const Color(0xFFFFF8F5).withOpacity(0), Colors.white],
+            child: IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      const Color(0xFFFFF8F5).withOpacity(0),
+                      Colors.white
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1001,6 +1011,249 @@ class _SectionTitle extends StatelessWidget {
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
         fontWeight: FontWeight.w800,
         color: _darkBlue,
+      ),
+    );
+  }
+}
+
+//
+// RECOMMENDATIONS SECTION
+//
+class _RecommendationsSection extends StatelessWidget {
+  const _RecommendationsSection();
+
+  void _showSubmitDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (context) => const _SubmitRecommendationDialog(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 900;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Testimonials', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800, color: _darkBlue)),
+                const SizedBox(height: 12),
+                Text('Kind words from people I\'ve worked with.', style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[700])),
+              ],
+            ),
+            if (!isMobile)
+              OutlinedButton.icon(
+                onPressed: () => _showSubmitDialog(context),
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                label: const Text("Write a Recommendation"),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _primaryOrange,
+                  side: const BorderSide(color: _primaryOrange),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                ),
+              ),
+          ],
+        ),
+        
+        const SizedBox(height: 32),
+
+        // Content
+        SizedBox(
+          height: 280,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: testimonials.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 24),
+            itemBuilder: (context, index) => _TestimonialCard(data: testimonials[index]),
+          ),
+        ),
+
+        // Mobile Button (shown below list instead of header)
+        if (isMobile) ...[
+          const SizedBox(height: 32),
+          Center(
+            child: OutlinedButton.icon(
+              onPressed: () => _showSubmitDialog(context),
+              icon: const Icon(Icons.edit_outlined, size: 18),
+              label: const Text("Write a Recommendation"),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: _primaryOrange,
+                side: const BorderSide(color: _primaryOrange),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _TestimonialCard extends StatelessWidget {
+  final Recommendation data;
+  const _TestimonialCard({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 350,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Quote Icon
+          const Icon(Icons.format_quote_rounded, color: Color(0xFFFFD0A8), size: 40),
+          const SizedBox(height: 12),
+          // Text
+          Expanded(
+            child: Text(
+              '"${data.text}"',
+              style: const TextStyle(color: Color(0xFF4A4A4A), height: 1.5, fontStyle: FontStyle.italic),
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Divider(height: 1),
+          const SizedBox(height: 16),
+          // Author Info
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: _darkBlue,
+                child: Text(data.name[0], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(data.name, style: const TextStyle(fontWeight: FontWeight.bold, color: _darkBlue, fontSize: 14)),
+                    Text("${data.role} • ${data.relation}", style: TextStyle(color: Colors.grey[600], fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// DIALOG TO SUBMIT RECOMMENDATION
+class _SubmitRecommendationDialog extends StatefulWidget {
+  const _SubmitRecommendationDialog();
+
+  @override
+  State<_SubmitRecommendationDialog> createState() => _SubmitRecommendationDialogState();
+}
+
+class _SubmitRecommendationDialogState extends State<_SubmitRecommendationDialog> {
+  final _nameController = TextEditingController();
+  final _relationController = TextEditingController();
+  final _messageController = TextEditingController();
+
+  Future<void> _submit() async {
+    final String subject = "Recommendation from ${_nameController.text}";
+    final String body = "Name: ${_nameController.text}\nRelation: ${_relationController.text}\n\nReview:\n${_messageController.text}";
+    
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'rjestuesta@gmail.com', // Your email
+      query: 'subject=$subject&body=$body',
+    );
+
+    try {
+      if (!await launchUrl(emailLaunchUri)) {
+        throw 'Could not launch';
+      }
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      // Fallback
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Could not open email app.")));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        width: 500,
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Write a Recommendation", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _darkBlue)),
+                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildTextField("Your Name", _nameController),
+            const SizedBox(height: 16),
+            _buildTextField("Relationship (e.g. Professor, Teammate)", _relationController),
+            const SizedBox(height: 16),
+            _buildTextField("Message", _messageController, maxLines: 4),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _primaryOrange,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text("Submit via Email", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller, {int maxLines = 1}) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
     );
   }
