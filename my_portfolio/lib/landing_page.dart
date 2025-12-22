@@ -156,7 +156,7 @@ class _LandingPageState extends State<LandingPage> {
 // HERO SECTION
 //
 class _HeroSection extends StatelessWidget {
-  const _HeroSection(); // No parameters needed now
+  const _HeroSection();
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +164,8 @@ class _HeroSection extends StatelessWidget {
     final isMobile = size.width < 900;
 
     return SizedBox(
-      height: isMobile ? null : size.height * 0.63, 
+      // 1. Give it enough height for the "zoomed in" look
+      height: isMobile ? null : size.height * 0.75, 
       width: double.infinity,
       child: Stack(
         children: [
@@ -196,7 +197,7 @@ class _HeroSection extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // CONTENT LAYER
           Positioned.fill(
             child: Align(
@@ -205,44 +206,28 @@ class _HeroSection extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 1200),
                 child: Padding(
                   padding: EdgeInsets.only(top: isMobile ? 40 : 50, left: 20, right: 20),
-                  child: isMobile 
-                    // removed arguments here
-                    ? Column(children: const [_HeroTextContent(), SizedBox(height: 40), _HeroImageContent()])
-                    : Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                           Expanded(flex: 5, child: _HeroTextContent()), // removed arguments here
-                           Expanded(flex: 6, child: _HeroImageContent()),
-                        ],
-                      ),
+                  child: isMobile
+                      ? Column(children: const [_HeroTextContent(), SizedBox(height: 40), _HeroImageContent()])
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.center, // Align center to handle larger image
+                          children: const [
+                            Expanded(flex: 5, child: _HeroTextContent()),
+                            Expanded(flex: 6, child: _HeroImageContent()),
+                          ],
+                        ),
                 ),
               ),
             ),
           ),
-
-          // BOTTOM FADE
-          Positioned(
-            bottom: 0, left: 0, right: 0, height: 100,
-            child: IgnorePointer(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      const Color(0xFFFFF8F5).withOpacity(0),
-                      Colors.white
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+          
+          // [REMOVED] The Bottom Fade from here. 
+          // We moved it inside _HeroImageContent to control layering better.
         ],
       ),
     );
   }
 }
+
 
 class _HeroTextContent extends StatelessWidget {
   const _HeroTextContent();
@@ -341,27 +326,50 @@ class _HeroImageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 550, 
+      // Increased height slightly to allow for a larger photo
+      height: 600, 
       child: Stack(
         alignment: Alignment.bottomCenter,
         children: [
+          // LAYER 1: The Image
           Positioned(
-            bottom: 0, right: 40, left: 40, top: 0,
+            bottom: 0, right: 0, left: 0, top: 0,
             child: Image.asset(
-              'assets/my_photo.png', 
-              fit: BoxFit.contain,
+              'assets/my_photo.png',
+              fit: BoxFit.contain, // Changed from cover to contain to respect width
               alignment: Alignment.bottomCenter,
             ),
           ),
+
+          // LAYER 2: The Gradient Fade (Must match background color 0xFFFFF8F5)
           Positioned(
-            top: 60, right: 0,
+            bottom: 0, left: 0, right: 0, 
+            height: 250, // Taller height = smoother fade
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFFFFF8F5).withOpacity(0), // Transparent at top
+                    const Color(0xFFFFF8F5), // Solid Cream at bottom (Matches Background)
+                  ],
+                  stops: const [0.0, 0.8], // Push the solid color down a bit
+                ),
+              ),
+            ),
+          ),
+
+          // LAYER 3: The Badges (Now they sit ON TOP of the fade)
+          Positioned(
+            top: 100, right: 20,
             child: _FloatingBadge(
               icon: Icons.emoji_events, iconColor: Colors.amber,
               title: 'BPI DataWave\n3rd Place Winner', delay: 0,
             ),
           ),
           Positioned(
-            bottom: 100, left: 0,
+            bottom: 80, left: 20,
             child: _FloatingBadge(
               icon: Icons.emoji_events, iconColor: Colors.blue,
               title: 'InnOlympics 2025\nTop 5 Finalist', delay: 500,
@@ -863,9 +871,19 @@ class _ProjectCardState extends State<_ProjectCard> {
           duration: const Duration(milliseconds: 200),
           transform: Matrix4.identity()..translate(0.0, _isHovering ? -10.0 : 0.0),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Color(0xFF3B46F1), Color(0xFF6A2AE0)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+            // [CHANGE] Dark Blue Gradient
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFF121528), // Your brand Dark Blue
+                Color(0xFF232946)  // Slightly lighter navy
+              ], 
+              begin: Alignment.topLeft, 
+              end: Alignment.bottomRight
+            ),
             borderRadius: BorderRadius.circular(30),
-            boxShadow: _isHovering ? [BoxShadow(color: const Color(0xFF3B46F1).withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 15))] : [],
+            boxShadow: _isHovering 
+                ? [BoxShadow(color: const Color(0xFF121528).withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 15))] 
+                : [],
           ),
           child: Padding(
             padding: const EdgeInsets.all(24.0),
@@ -1153,7 +1171,7 @@ class _TestimonialCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(data.name, style: const TextStyle(fontWeight: FontWeight.bold, color: _darkBlue, fontSize: 14)),
-                    Text("${data.role} • ${data.relation}", style: TextStyle(color: Colors.grey[600], fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text("${data.role}", style: TextStyle(color: Colors.grey[600], fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                   ],
                 ),
               )
@@ -1175,12 +1193,12 @@ class _SubmitRecommendationDialog extends StatefulWidget {
 
 class _SubmitRecommendationDialogState extends State<_SubmitRecommendationDialog> {
   final _nameController = TextEditingController();
-  final _relationController = TextEditingController();
+  final _roleController = TextEditingController();
   final _messageController = TextEditingController();
 
   Future<void> _submit() async {
     final String subject = "Recommendation from ${_nameController.text}";
-    final String body = "Name: ${_nameController.text}\nRelation: ${_relationController.text}\n\nReview:\n${_messageController.text}";
+    final String body = "Name: ${_nameController.text}\nRole: ${_roleController.text}\n\nReview:\n${_messageController.text}";
     
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
@@ -1222,9 +1240,9 @@ class _SubmitRecommendationDialogState extends State<_SubmitRecommendationDialog
               ],
             ),
             const SizedBox(height: 24),
-            _buildTextField("Your Name", _nameController),
+            _buildTextField("Name", _nameController),
             const SizedBox(height: 16),
-            _buildTextField("Relationship (e.g. Professor, Teammate)", _relationController),
+            _buildTextField("Role (e.g., Senior Data Analyst)", _roleController),
             const SizedBox(height: 16),
             _buildTextField("Message", _messageController, maxLines: 4),
             const SizedBox(height: 32),
