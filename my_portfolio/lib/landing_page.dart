@@ -26,33 +26,6 @@ Future<void> _launchURL(String url) async {
   }
 }
 
-// [FIX] Now accepts context for Clipboard fallback
-Future<void> _launchEmail(BuildContext context) async {
-  final Uri emailLaunchUri = Uri(
-    scheme: 'mailto',
-    path: 'rjestuesta@gmail.com',
-    query: 'subject=Inquiry from Portfolio',
-  );
-
-  try {
-    if (!await launchUrl(emailLaunchUri, mode: LaunchMode.externalApplication)) {
-      throw 'Could not launch';
-    }
-  } catch (e) {
-    // Fallback: Copy to clipboard
-    await Clipboard.setData(const ClipboardData(text: 'rjestuesta@gmail.com'));
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Email client not found. Address copied to clipboard!'),
-          backgroundColor: Color(0xFFE85D04),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-}
-
 // --- MAIN STATE ---
 
 class _LandingPageState extends State<LandingPage> {
@@ -333,10 +306,10 @@ class _HeroImageContent extends StatelessWidget {
         children: [
           // LAYER 1: The Image
           Positioned(
-            bottom: 0, right: 0, left: 0, top: 0,
+            bottom: 20, right: 0, left: 0, top: 0,
             child: Image.asset(
-              'assets/my_photo.png',
-              fit: BoxFit.contain, // Changed from cover to contain to respect width
+              'assets/my_photo_v3.png',
+              fit: BoxFit.cover, // Changed from cover to contain to respect width
               alignment: Alignment.bottomCenter,
             ),
           ),
@@ -344,7 +317,7 @@ class _HeroImageContent extends StatelessWidget {
           // LAYER 2: The Gradient Fade (Must match background color 0xFFFFF8F5)
           Positioned(
             bottom: 0, left: 0, right: 0, 
-            height: 250, // Taller height = smoother fade
+            height: 150, // Taller height = smoother fade
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -571,9 +544,8 @@ class _CertificateTile extends StatefulWidget {
   final String organization;
   final IconData icon;
   final String assetPath;
-  final bool isHighlighted;
 
-  const _CertificateTile({super.key, required this.title, required this.organization, required this.icon, required this.assetPath, this.isHighlighted = false});
+  const _CertificateTile({required this.title, required this.organization, required this.icon, required this.assetPath});
 
   @override
   State<_CertificateTile> createState() => _CertificateTileState();
@@ -584,8 +556,8 @@ class _CertificateTileState extends State<_CertificateTile> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final backgroundColor = _isHovering ? const Color(0xFFFFEFE4) : (widget.isHighlighted ? const Color(0xFFFFF7F1) : Colors.white);
-    final borderColor = _isHovering ? const Color(0xFFFF7A2F) : (widget.isHighlighted ? const Color(0xFFFF7A2F).withOpacity(0.3) : Colors.grey.withOpacity(0.15));
+    final backgroundColor = _isHovering ? const Color(0xFFFFEFE4) : Colors.white;
+    final borderColor = _isHovering ? const Color(0xFFFF7A2F) : Colors.grey.withOpacity(0.15);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -882,7 +854,7 @@ class _ProjectCardState extends State<_ProjectCard> {
             ),
             borderRadius: BorderRadius.circular(30),
             boxShadow: _isHovering 
-                ? [BoxShadow(color: const Color(0xFF121528).withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 15))] 
+                ? [BoxShadow(color: const Color(0xFF121528).withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 15))] 
                 : [],
           ),
           child: Padding(
@@ -893,19 +865,29 @@ class _ProjectCardState extends State<_ProjectCard> {
                 Expanded(
                   child: Container(
                     width: double.infinity,
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
-                      child: Image.asset(widget.project.bannerImage, fit: BoxFit.cover, errorBuilder: (ctx, _, __) => Center(child: Icon(Icons.broken_image, color: Colors.white.withOpacity(0.5), size: 40))),
+                      child: Image.asset(widget.project.bannerImage, fit: BoxFit.cover, errorBuilder: (ctx, _, __) => Center(child: Icon(Icons.broken_image, color: Colors.white.withValues(alpha: 0.5), size: 40))),
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
                 Text(widget.project.title, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                Text(widget.project.shortDescription, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14), maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text(widget.project.shortDescription, style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 14), maxLines: 2, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 16),
-                const Text("View Case Study →", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("View Case Study →", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                    if (widget.project.projectLink != null && widget.project.projectLink!.isNotEmpty)
+                      GestureDetector(
+                        onTap: () => _launchURL(widget.project.projectLink!),
+                        child: const Icon(Icons.open_in_new, color: Colors.white, size: 18),
+                      ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -959,7 +941,7 @@ class _ProjectDetailDialog extends StatelessWidget {
                   const SizedBox(height: 32),
                   Wrap(spacing: 8, runSpacing: 8, children: project.tools.map((tool) => Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(color: const Color(0xFFFF7A2F).withOpacity(0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFFF7A2F).withOpacity(0.3))),
+                    decoration: BoxDecoration(color: const Color(0xFFFF7A2F).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFFF7A2F).withValues(alpha: 0.3))),
                     child: Text(tool, style: const TextStyle(color: Color(0xFFE85D04), fontWeight: FontWeight.w600, fontSize: 12)),
                   )).toList()),
                   const SizedBox(height: 32),
@@ -1005,7 +987,7 @@ class _ProjectDetailDialog extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const Row(children: [Icon(Icons.person, color: Color(0xFFFF7A2F)), SizedBox(width: 10), Text("My Role", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18))]),
           const SizedBox(height: 12),
-          Text(project.myRole, style: TextStyle(color: Colors.white.withOpacity(0.9), height: 1.5)),
+          Text(project.myRole, style: TextStyle(color: Colors.white.withValues(alpha: 0.9), height: 1.5)),
         ]),
       ),
       const SizedBox(height: 32),
@@ -1130,10 +1112,10 @@ class _TestimonialCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -1171,7 +1153,7 @@ class _TestimonialCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(data.name, style: const TextStyle(fontWeight: FontWeight.bold, color: _darkBlue, fontSize: 14)),
-                    Text("${data.role}", style: TextStyle(color: Colors.grey[600], fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(data.role, style: TextStyle(color: Colors.grey[600], fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                   ],
                 ),
               )
@@ -1197,25 +1179,29 @@ class _SubmitRecommendationDialogState extends State<_SubmitRecommendationDialog
   final _messageController = TextEditingController();
 
   Future<void> _submit() async {
-    final String subject = "Recommendation from ${_nameController.text}";
-    final String body = "Name: ${_nameController.text}\nRole: ${_roleController.text}\n\nReview:\n${_messageController.text}";
+    final String name = _nameController.text;
+    final String role = _roleController.text;
+    final String message = _messageController.text;
     
-    final Uri emailLaunchUri = Uri(
-      scheme: 'mailto',
-      path: 'rjestuesta@gmail.com', // Your email
-      query: 'subject=$subject&body=$body',
-    );
-
+    final String body = "Name: $name\nRole: $role\n\nReview:\n$message";
+    final String encodedBody = Uri.encodeComponent(body);
+    
+    final String gmailUrl = "https://mail.google.com/mail/?view=cm&fs=1&to=rjestuesta@gmail.com&su=Portfolio%20Testimonial&body=$encodedBody";
+    
     try {
-      if (!await launchUrl(emailLaunchUri)) {
-        throw 'Could not launch';
-      }
+      await _launchURL(gmailUrl);
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      // Fallback
+      // Fallback: Copy to clipboard
+      await Clipboard.setData(const ClipboardData(text: 'rjestuesta@gmail.com'));
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Could not open email app.")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Email client not found. Address copied to clipboard!"),
+            backgroundColor: Color(0xFFE85D04),
+          ),
+        );
       }
     }
   }
