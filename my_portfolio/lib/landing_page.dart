@@ -31,14 +31,16 @@ Future<void> _launchURL(String url) async {
 class _LandingPageState extends State<LandingPage> {
   // 1. Create Keys for scrolling
   final GlobalKey _homeKey = GlobalKey();
-  final GlobalKey _certificationsKey = GlobalKey();
-  final GlobalKey _skillsKey = GlobalKey(); 
+  final GlobalKey _servicesKey = GlobalKey();
+  final GlobalKey _experienceKey = GlobalKey();
   final GlobalKey _projectsKey = GlobalKey();
+  final GlobalKey _skillsKey = GlobalKey(); 
   final GlobalKey _contactKey = GlobalKey();
 
   // 3. Scroll Logic
   void _scrollToSection(int index) {
-    final keys = [_homeKey, _certificationsKey, _skillsKey, _projectsKey, _contactKey];
+    // Keys mapping: 0=Home, 1=Services, 2=Experience, 3=Projects, 4=Skills
+    final keys = [_homeKey, _servicesKey, _experienceKey, _projectsKey, _skillsKey];
     if (index >= 0 && index < keys.length) {
       final key = keys[index];
       if (key.currentContext != null) {
@@ -73,37 +75,36 @@ class _LandingPageState extends State<LandingPage> {
                       
                       const SizedBox(height: 60),
                       const _ClientLogosRow(),
+
+                      const SizedBox(height: 60),
+                      // SERVICES
+                      Container(key: _servicesKey, child: const _ServicesSection()),
                       
                       const SizedBox(height: 60),
-                      // CERTIFICATIONS
-                      Container(
-                        key: _certificationsKey, 
-                        child: _CertificationsSection(
-                          onViewAll: () => _scrollToSection(1), 
-                        )
-                      ),
-                      
-                      const SizedBox(height: 60),
-                      // ACADEMIC / ACHIEVEMENTS
-                      const _ClientsSection(), 
-                      
-                      const SizedBox(height: 60),
-                      // TECH STACK
-                      Container(
-                         key: _skillsKey, 
-                         child: _StatsSection(
-                           onSeeProjects: () => _scrollToSection(3),
-                         )
-                      ), 
+                      // EXPERIENCE
+                      Container(key: _experienceKey, child: const _ExperienceSection()),
                       
                       const SizedBox(height: 60),
                       // PROJECTS
                       Container(key: _projectsKey, child: const _RecentProjectsSection()),
 
                       const SizedBox(height: 60),
+                      // TECH STACK
+                      Container(
+                         key: _skillsKey, 
+                         child: _StatsSection(
+                           onSeeProjects: () => _scrollToSection(3), // Index 3 is Projects
+                         )
+                      ), 
+                      
+                      const SizedBox(height: 60),
+                      // ACADEMIC / ACHIEVEMENTS
+                      const _ClientsSection(), 
+                      
+                      const SizedBox(height: 60),
                       // RECOMMENDATIONS
                       const _RecommendationsSection(),
-                                           
+
                       const SizedBox(height: 60),
                       // CTA / CONTACT
                       Container(key: _contactKey, child: const _CtaSection()),
@@ -137,8 +138,6 @@ class _HeroSection extends StatelessWidget {
     final isMobile = size.width < 900;
 
     return SizedBox(
-      // 1. Give it enough height for the "zoomed in" look
-      height: isMobile ? null : size.height * 0.75, 
       width: double.infinity,
       child: Stack(
         children: [
@@ -172,29 +171,24 @@ class _HeroSection extends StatelessWidget {
           ),
 
           // CONTENT LAYER
-          Positioned.fill(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1200),
-                child: Padding(
-                  padding: EdgeInsets.only(top: isMobile ? 40 : 50, left: 20, right: 20),
-                  child: isMobile
-                      ? Column(children: const [_HeroTextContent(), SizedBox(height: 40), _HeroImageContent()])
-                      : Row(
-                          crossAxisAlignment: CrossAxisAlignment.center, // Align center to handle larger image
-                          children: const [
-                            Expanded(flex: 5, child: _HeroTextContent()),
-                            Expanded(flex: 6, child: _HeroImageContent()),
-                          ],
-                        ),
-                ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Padding(
+                padding: EdgeInsets.only(top: isMobile ? 40 : 50, left: 20, right: 20),
+                child: isMobile
+                    ? Column(children: const [_HeroTextContent(), SizedBox(height: 40), _HeroImageContent()])
+                    : Row(
+                        crossAxisAlignment: CrossAxisAlignment.center, // Align center to handle larger image
+                        children: const [
+                          Expanded(flex: 5, child: _HeroTextContent()),
+                          Expanded(flex: 6, child: _HeroImageContent()),
+                        ],
+                      ),
               ),
             ),
           ),
-          
-          // [REMOVED] The Bottom Fade from here. 
-          // We moved it inside _HeroImageContent to control layering better.
         ],
       ),
     );
@@ -208,52 +202,11 @@ class _HeroTextContent extends StatelessWidget {
 @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 40.0), // Reduced top padding slightly to fit badge
+      padding: const EdgeInsets.only(top: 10.0), // Reduced top padding slightly to fit badge
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // --- NEW: STATUS INDICATOR ---
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE0F2F1), // Very light teal/green background
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF009688).withOpacity(0.3)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Green "Live" Dot
-                Container(
-                  width: 8, height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF009688), // Teal/Green
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0x66009688),
-                        blurRadius: 6,
-                        spreadRadius: 2,
-                      )
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                const Text(
-                  "Open for Internship",
-                  style: TextStyle(
-                    color: Color(0xFF00695C), // Darker Teal Text
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // --- END NEW INDICATOR ---
-
-          const SizedBox(height: 24),
+          // (Open for Internship Banner Removed)
           
           Text('Hey! I Am', style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800, color: _darkBlue)),
@@ -299,8 +252,8 @@ class _HeroImageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      // Increased height slightly to allow for a larger photo
-      height: 600, 
+      // Reduced height to fit CTA directly below
+      height: 500, 
       child: Stack(
         alignment: Alignment.bottomCenter,
         children: [
@@ -309,7 +262,7 @@ class _HeroImageContent extends StatelessWidget {
             bottom: 20, right: 0, left: 0, top: 0,
             child: Image.asset(
               'assets/my_photo_v3.png',
-              fit: BoxFit.cover, // Changed from cover to contain to respect width
+              fit: BoxFit.contain, // Changed from cover to contain to respect width
               alignment: Alignment.bottomCenter,
             ),
           ),
@@ -335,17 +288,24 @@ class _HeroImageContent extends StatelessWidget {
 
           // LAYER 3: The Badges (Now they sit ON TOP of the fade)
           Positioned(
-            top: 100, right: 20,
+            top: 100, left: 50,
             child: _FloatingBadge(
               icon: Icons.emoji_events, iconColor: Colors.amber,
-              title: 'BPI DataWave\n3rd Place Winner', delay: 0,
+              title: 'BPI DataWave\n3rd Place', delay: 0,
             ),
           ),
           Positioned(
-            bottom: 80, left: 20,
+            bottom: 80, left: 0,
             child: _FloatingBadge(
               icon: Icons.emoji_events, iconColor: Colors.blue,
-              title: 'InnOlympics 2025\nTop 5 Finalist', delay: 500,
+              title: 'InnOlympics 25\nTop 5 Finalist', delay: 500,
+            ),
+          ),
+          Positioned(
+            bottom: 170, right: 0,
+            child: _FloatingBadge(
+              icon: Icons.emoji_events, iconColor: Colors.red,
+              title: 'Context Engineer\nat Open iT, Asia Inc.', delay: 0,
             ),
           ),
         ],
@@ -382,7 +342,8 @@ class _FloatingBadgeState extends State<_FloatingBadge> with SingleTickerProvide
       animation: _controller,
       builder: (context, child) => Transform.translate(offset: Offset(0, 8 * (0.5 - _controller.value)), child: child),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        constraints: const BoxConstraints(maxWidth: 220), // ADDED CONSTRAINT FOR OVERFLOW
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white, borderRadius: BorderRadius.circular(24),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 24, offset: const Offset(0, 12))],
@@ -393,10 +354,10 @@ class _FloatingBadgeState extends State<_FloatingBadge> with SingleTickerProvide
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(color: widget.iconColor.withOpacity(0.1), shape: BoxShape.circle),
-              child: Icon(widget.icon, color: widget.iconColor, size: 28),
+              child: Icon(widget.icon, color: widget.iconColor, size: 24),
             ),
             const SizedBox(width: 12),
-            Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w700, color: _darkBlue, height: 1.2)),
+            Flexible(child: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w700, color: _darkBlue, height: 1.2, fontSize: 13))),
           ],
         ),
       ),
@@ -462,147 +423,7 @@ class _SocialIcon extends StatelessWidget {
   }
 }
 
-class _CertificationsSection extends StatelessWidget {
-  final VoidCallback? onViewAll;
-  const _CertificationsSection({this.onViewAll});
-
-  @override
-  Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 900;
-    if (isMobile) {
-      return Column(children: [const _CertificationsList(), const SizedBox(height: 32), _CertificationsDescription(onViewAll: onViewAll)]);
-    }
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: const _CertificationsList()),
-        const SizedBox(width: 40),
-        Expanded(child: _CertificationsDescription(onViewAll: onViewAll)),
-      ],
-    );
-  }
-}
-
-class _CertificationsDescription extends StatelessWidget {
-  final VoidCallback? onViewAll;
-  const _CertificationsDescription({this.onViewAll});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Workshops Attended', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: _darkBlue)),
-        const SizedBox(height: 12),
-        Text(
-          'Technology moves fast, and I make sure to keep up. Beyond my university coursework, I actively participate in workshops ranging from Generative AI to Blockchain development.',
-          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
-        ),
-        const SizedBox(height: 24),
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            side: const BorderSide(color: _primaryOrange),
-            foregroundColor: _darkBlue,
-          ),
-          onPressed: onViewAll ?? () {}, 
-          child: const Text('View All Credentials'),
-        ),
-      ],
-    );
-  }
-}
-
-class _CertificationsList extends StatelessWidget {
-  const _CertificationsList();
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white, borderRadius: BorderRadius.circular(28),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 10))],
-      ),
-      child: Column(
-        children: const [
-          _CertificateTile(title: 'PJDSC 2025 Hybrid Workshop', organization: 'UP Data Science Society', icon: Icons.analytics, assetPath: 'assets/certs/pjdsc_2025.png'),
-          SizedBox(height: 12),
-          _CertificateTile(title: 'Startup Primer & Ideation', organization: 'Enverga Innovation Challenge', icon: Icons.lightbulb, assetPath: 'assets/certs/innovation_challenge.png'),
-          SizedBox(height: 12),
-          _CertificateTile(title: 'Rev Up: Startup Roadshow', organization: 'UPLB ICONS & MSEUF', icon: Icons.rocket_launch, assetPath: 'assets/certs/rev_up_2025.png'),
-          SizedBox(height: 12),
-          _CertificateTile(title: 'Tech Nexus 2024', organization: 'Campus DEVCON', icon: Icons.hub, assetPath: 'assets/certs/tech_nexus_2024.png'),
-        ],
-      ),
-    );
-  }
-}
-
-class _CertificateTile extends StatefulWidget {
-  final String title;
-  final String organization;
-  final IconData icon;
-  final String assetPath;
-
-  const _CertificateTile({required this.title, required this.organization, required this.icon, required this.assetPath});
-
-  @override
-  State<_CertificateTile> createState() => _CertificateTileState();
-}
-
-class _CertificateTileState extends State<_CertificateTile> {
-  bool _isHovering = false;
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final backgroundColor = _isHovering ? const Color(0xFFFFEFE4) : Colors.white;
-    final borderColor = _isHovering ? const Color(0xFFFF7A2F) : Colors.grey.withOpacity(0.15);
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovering = true),
-      onExit: (_) => setState(() => _isHovering = false),
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (context) => Dialog(
-              backgroundColor: Colors.transparent,
-              insetPadding: const EdgeInsets.all(16),
-              child: Stack(
-                alignment: Alignment.topRight,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(widget.assetPath, fit: BoxFit.contain, errorBuilder: (ctx, _, __) => Container(padding: const EdgeInsets.all(40), color: Colors.white, child: const Icon(Icons.broken_image))),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: CircleAvatar(backgroundColor: Colors.black54, radius: 18, child: IconButton(icon: const Icon(Icons.close, size: 20, color: Colors.white), onPressed: () => Navigator.of(context).pop())),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(20), border: Border.all(color: borderColor, width: _isHovering ? 1.5 : 1.0)),
-          child: Row(
-            children: [
-              Container(padding: const EdgeInsets.all(10), decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: Icon(widget.icon, color: const Color(0xFFFF7A2F), size: 24)),
-              const SizedBox(width: 16),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(widget.title, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700), maxLines: 2), Text(widget.organization, style: theme.textTheme.bodySmall)])),
-              Icon(Icons.visibility_outlined, color: _isHovering ? const Color(0xFFFF7A2F) : Colors.grey[400], size: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+// Removed Certifications section
 
 class _ImageCarousel extends StatefulWidget {
   const _ImageCarousel();
@@ -680,19 +501,43 @@ class _ClientsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isMobile = MediaQuery.of(context).size.width < 900;
-    final textColumn = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Academic Excellence\n& Recognition', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800, color: _darkBlue)),
-        const SizedBox(height: 12),
-        Text('As a Computer Science student at MSEUF, I consistently challenge myself beyond the classroom.', style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[700])),
-        const SizedBox(height: 16),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
-          _BulletText(text: '3rd Place: BPI DataWave 2024 (ML Track)'),
-          _BulletText(text: 'Top 5 Finalist: InnOlympics 2025'),
-          _BulletText(text: 'Consistent Dean\'s Lister & Academic Scholar'),
-        ])
-      ],
+    final textColumn = Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: const Color(0xFFFF7A2F).withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF7A2F).withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.school, color: Color(0xFFFF7A2F), size: 32),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text('Academic Excellence\n& Recognition', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800, color: _darkBlue, height: 1.2)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text('As a Computer Science student at MSEUF, I consistently challenge myself beyond the classroom.', style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[700])),
+          const SizedBox(height: 24),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
+            _BulletText(text: 'Current GWA: 1.28'),
+            _BulletText(text: '3rd Place: BPI DataWave 2024 (ML Track)'),
+            _BulletText(text: 'Top 5 Finalist: InnOlympics 2025'),
+            _BulletText(text: 'Consistent Dean\'s Lister & Academic Scholar'),
+          ])
+        ],
+      ),
     );
     if (isMobile) return Column(children: [textColumn, const SizedBox(height: 32), const _ImageCarousel()]);
     return Row(children: [Expanded(child: textColumn), const SizedBox(width: 40), const Expanded(child: _ImageCarousel())]);
@@ -736,6 +581,8 @@ class _StatsSection extends StatelessWidget {
           const Divider(color: Colors.white12, height: 32),
           const _SkillGroup(icon: Icons.psychology, category: "AI & Data Science", skills: "TensorFlow • Pandas • Scikit-Learn • HuggingFace"),
           const Divider(color: Colors.white12, height: 32),
+          const _SkillGroup(icon: Icons.auto_awesome, category: "Workflow & Automation", skills: "Context Engineering • n8n • AI Automation"),
+          const Divider(color: Colors.white12, height: 32),
           const _SkillGroup(icon: Icons.layers, category: "App Dev & Tools", skills: "Flutter • Firebase • Git • MySQL"),
         ],
       ),
@@ -761,6 +608,399 @@ class _StatsSection extends StatelessWidget {
 
     if (isMobile) return Column(children: [techCard, const SizedBox(height: 32), textColumn]);
     return Row(children: [Expanded(flex: 5, child: techCard), const SizedBox(width: 50), Expanded(flex: 6, child: textColumn)]);
+  }
+}
+
+//
+// EXPERIENCE SECTION
+//
+class _ExperienceSection extends StatelessWidget {
+  const _ExperienceSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Experience', 
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w900, 
+            color: Colors.black, // Matching the sleek black requested
+            letterSpacing: -0.5,
+          )
+        ),
+        const SizedBox(height: 40),
+        const _ExperienceTimeline(),
+      ],
+    );
+  }
+}
+
+class _ExperienceTimeline extends StatelessWidget {
+  const _ExperienceTimeline();
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Map<String, dynamic>> experiences = [
+      {
+        "title": "Context Engineer Intern",
+        "company": "Open iT, Asia Inc.",
+        "year": "2026",
+        "isCurrent": true,
+      },
+      {
+        "title": "BS Computer Science",
+        "company": "Manuel S. Enverga University Foundation",
+        "year": "2026",
+        "isCurrent": false,
+      },
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: Column(
+        children: List.generate(experiences.length, (index) {
+          final exp = experiences[index];
+          final isLast = index == experiences.length - 1;
+          return _ExperienceItem(
+            title: exp["title"],
+            company: exp["company"],
+            year: exp["year"],
+            isCurrent: exp["isCurrent"] as bool,
+            isLast: isLast,
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class _ExperienceItem extends StatelessWidget {
+  final String title;
+  final String company;
+  final String year;
+  final bool isCurrent;
+  final bool isLast;
+
+  const _ExperienceItem({
+    required this.title,
+    required this.company,
+    required this.year,
+    required this.isCurrent,
+    required this.isLast,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Timeline Indicator Column
+          SizedBox(
+            width: 30, // Fixed width for vertical alignment
+            child: Column(
+              children: [
+                // The Square Indicator
+                Container(
+                  width: 14,
+                  height: 14,
+                  margin: const EdgeInsets.only(top: 6),
+                  decoration: BoxDecoration(
+                    color: isCurrent ? Colors.black : Colors.white,
+                    border: Border.all(
+                      color: isCurrent ? Colors.black : Colors.grey.shade300, 
+                      width: 2
+                    ),
+                  ),
+                ),
+                // The Connecting Line
+                if (!isLast)
+                  Expanded(
+                    child: Container(
+                      width: 1,
+                      color: Colors.grey.shade300,
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                    ),
+                  )
+                else
+                  const SizedBox(height: 24), // give some bottom padding to the very last item naturally
+              ],
+            ),
+          ),
+          
+          const SizedBox(width: 12),
+          
+          // Content Column
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 32.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title, 
+                          style: const TextStyle(
+                            fontSize: 18, 
+                            fontWeight: FontWeight.w800, 
+                            color: Colors.black,
+                            letterSpacing: -0.3,
+                          )
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          company, 
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: Colors.grey.shade800,
+                            fontWeight: FontWeight.w400,
+                          )
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Year Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FA), // Very light grey bg similar to photo
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      year,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+//
+// SERVICES SECTION
+//
+class _ServicesSection extends StatelessWidget {
+  const _ServicesSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isMobile = MediaQuery.of(context).size.width < 900;
+    
+    final services = [
+      {
+        "title": "End-to-End Workflow Automation",
+        "desc": "Streamline your operations by integrating your disparate systems. Using advanced platforms like n8n, I architect workflows that connect your core infrastructure (CRMs, Postgres databases, email) with AI agents to handle lead routing, invoice processing, and automated follow-ups.",
+        "icon": Icons.account_tree,
+      },
+      {
+        "title": "Context Engineering & RAG Pipelines",
+        "desc": "Unlock the value of your unstructured data. I develop secure Retrieval-Augmented Generation (RAG) pipelines using Python that integrate your proprietary documents into a centralized, queryable AI knowledge base for your employees.",
+        "icon": Icons.schema,
+      },
+      {
+        "title": "Machine Learning Data Pipelines",
+        "desc": "Leverage your historical data for strategic foresight. I build and deploy end-to-end predictive models designed to optimize your operations, from forecasting inventory demands to identifying churn risks.",
+        "icon": Icons.analytics,
+      },
+      {
+        "title": "Custom Cross-Platform Interfaces",
+        "desc": "Bridge the gap between complex backend AI and user experience. I build bespoke, intuitive internal applications using Flutter and Dart, providing your team with a custom-tailored environment to interact with your data.",
+        "icon": Icons.devices,
+      }
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              "Work with me", 
+              style: theme.textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.w900, 
+                color: _darkBlue,
+                fontSize: 48,
+                letterSpacing: -1,
+              )
+            ),
+            if (!isMobile) ...[
+              const SizedBox(width: 24),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 6.0),
+                  child: Text(
+                    "Services tailored for modern operations", 
+                    style: TextStyle(fontSize: 18, color: Colors.grey.shade600, fontWeight: FontWeight.w500)
+                  ),
+                ),
+              )
+            ]
+          ],
+        ),
+        if (isMobile) ...[
+          const SizedBox(height: 8),
+          Text(
+            "Services tailored for modern operations", 
+            style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.w500)
+          ),
+        ],
+        const SizedBox(height: 48),
+        
+        // Grid / List
+        if (isMobile)
+          Column(
+            children: services.map((s) => Padding(
+              padding: const EdgeInsets.only(bottom: 24.0),
+              child: _ServiceCard(
+                title: s["title"] as String,
+                desc: s["desc"] as String,
+                icon: s["icon"] as IconData,
+              ),
+            )).toList(),
+          )
+        else
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    _ServiceCard(
+                      title: services[0]["title"] as String,
+                      desc: services[0]["desc"] as String,
+                      icon: services[0]["icon"] as IconData,
+                    ),
+                    const SizedBox(height: 32),
+                    _ServiceCard(
+                      title: services[2]["title"] as String,
+                      desc: services[2]["desc"] as String,
+                      icon: services[2]["icon"] as IconData,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 32),
+              Expanded(
+                child: Column(
+                  children: [
+                    _ServiceCard(
+                      title: services[1]["title"] as String,
+                      desc: services[1]["desc"] as String,
+                      icon: services[1]["icon"] as IconData,
+                    ),
+                    const SizedBox(height: 32),
+                    _ServiceCard(
+                      title: services[3]["title"] as String,
+                      desc: services[3]["desc"] as String,
+                      icon: services[3]["icon"] as IconData,
+                    ),
+                  ],
+                ),
+              )
+            ],
+          )
+      ],
+    );
+  }
+}
+
+class _ServiceCard extends StatefulWidget {
+  final String title;
+  final String desc;
+  final IconData icon;
+
+  const _ServiceCard({
+    required this.title,
+    required this.desc,
+    required this.icon,
+  });
+
+  @override
+  State<_ServiceCard> createState() => _ServiceCardState();
+}
+
+class _ServiceCardState extends State<_ServiceCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: _isHovered ? _primaryOrange.withValues(alpha: 0.5) : Colors.grey.shade200,
+            width: _isHovered ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: _isHovered 
+                  ? _primaryOrange.withValues(alpha: 0.15) 
+                  : Colors.black.withValues(alpha: 0.04),
+              blurRadius: _isHovered ? 32 : 16,
+              offset: Offset(0, _isHovered ? 12 : 8),
+            )
+          ]
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _primaryOrange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(widget.icon, color: _primaryOrange, size: 28),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              widget.title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: _darkBlue,
+                letterSpacing: -0.3,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              widget.desc,
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.grey.shade700,
+                height: 1.6,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
 

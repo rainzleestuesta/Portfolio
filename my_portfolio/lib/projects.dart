@@ -84,4 +84,23 @@ final List<Project> myProjects = [
         "corpus with a licensed psychologist, implementing the training loop with class-weighted cross-entropy loss, "
         "and evaluating model performance. I selected and deployed the final XLM-R model for the RAG pipeline.",
   ),
+  // 3. LIFE OS
+  Project(
+    title: "Life OS",
+    shortDescription: "Personal Life OS application for iOS",
+    bannerImage: "assets/projects/life-os-logo.png", 
+    architectureImage: "assets/projects/life-os-architecture.png",
+    projectLink: "https://github.com/rainzleestuesta/life-os", 
+    fullOverview: "A feature-first Personal Life OS application for iOS, designed to help users manage their daily tasks, finances, and overall productivity in one centralized dashboard. Built using Flutter and Material 3 design principles for a premium feel.",
+    problem: "People often rely on multiple disjointed applications to track their tasks, manage budgets, and plan their goals. There was a need for a unified 'operating system' for personal life that seamlessly integrates these tools.",
+    features: [
+      "Task Manager with progress tracking",
+      "Finance Tracker for budget and expense management",
+      "Unified Material 3 Dashboard",
+      "Local Storage with Hive and State Management with Riverpod"
+    ],
+    architectureText: "The application is built entirely using Flutter and following a feature-first project structure. It utilizes Riverpod for robust and scalable state management, and Hive for fast, local NoSQL data storage, ensuring offline capabilities.",
+    tools: ["Flutter", "Dart", "Hive", "Riverpod", "Material 3"],
+    myRole: "I developed the entire iOS application from scratch, including UI design, state management implementation, and local storage integration. Focus was put on creating a modern and intuitive user experience.",
+  ),
 ];

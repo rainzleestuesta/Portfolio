@@ -8,33 +8,6 @@ class AppNavBar extends StatelessWidget {
 
   const AppNavBar({super.key, required this.onNavClick});
 
-  // Helper to launch email
-  Future<void> _launchEmail(BuildContext context) async {
-    final Uri emailLaunchUri = Uri(
-      scheme: 'mailto',
-      path: 'rjestuesta@gmail.com',
-      query: 'subject=Inquiry from Portfolio',
-    );
-
-    try {
-      if (!await launchUrl(emailLaunchUri, mode: LaunchMode.externalApplication)) {
-        throw 'Could not launch';
-      }
-    } catch (e) {
-      // FALLBACK: Copy to clipboard
-      await Clipboard.setData(const ClipboardData(text: 'rjestuesta@gmail.com'));
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Email client not found. Address copied to clipboard!'),
-            backgroundColor: Color(0xFFE85D04),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 900;
@@ -59,9 +32,10 @@ class AppNavBar extends StatelessWidget {
           
           if (!isMobile) ...[
             _NavItem(label: 'Home', onTap: () => onNavClick(0)),
-            _NavItem(label: 'Certifications', onTap: () => onNavClick(1)),
-            _NavItem(label: 'Skills', onTap: () => onNavClick(2)),
+            _NavItem(label: 'Services', onTap: () => onNavClick(1)),
+            _NavItem(label: 'Experience', onTap: () => onNavClick(2)),
             _NavItem(label: 'Projects', onTap: () => onNavClick(3)),
+            _NavItem(label: 'Skills', onTap: () => onNavClick(4)),
             const SizedBox(width: 32),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
